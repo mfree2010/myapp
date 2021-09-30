@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stor-nfs
+  namespace: default
+  labels:
+    app: nfs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      name: nfs
+      namespace: default
+      labels:
+        app: nfs
+        tier: storage
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: nfs-storage
+        nfs:
+          path: /data/volumes
+          server: 192.168.107.89
+      containers:
+      - name: nfs-test
+        image: ikubernetes/myapp:v1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          periodSeconds: 15
+          initialDelaySeconds: 20
+          timeoutSeconds: 10
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html/
+          name: nfs-storage

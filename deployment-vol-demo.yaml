@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-demo
+  namespace: default
+  labels:
+    app: myapp
+    tier: frontend
+  annotations:
+    magedu.com/created-by: "cluster admin"
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+      tier: frontend
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: myapp
+        tier: frontend
+    spec:
+      volumes:
+      - name: html
+        emptyDir: {}
+      containers:
+      - name: httpd
+        image: ikubernetes/myapp:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      - name: busybox
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: html
+          mountPath: /data
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "while true;do echo `date` >> /data/index.html; sleep 2; done"

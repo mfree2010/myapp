@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: deploy-nfs
+  namespace: default
+  labels:
+    app: deploy-nfs
+spec:
+  ports:
+  - name: deploy-nfs-nginx
+    port: 30081
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: nfs
+  type: ClusterIP

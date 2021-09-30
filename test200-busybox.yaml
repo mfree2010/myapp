@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test200-busybox
+  namespace: test200
+  labels:
+    app: test200
+    tier: busybox
+  annotations:
+    magedu.com/created-by: "cluster admin"
+spec:
+  selector:
+    matchLabels:
+      app: busybox
+      tier: busybox
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: busybox
+        tier: busybox
+    spec:
+      volumes:
+      - name: html
+        emptyDir: {}
+      containers:
+      - name: busybox
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: html
+          mountPath: /data
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "while true;do echo `date` > /data/index.html; sleep 2; done"
+

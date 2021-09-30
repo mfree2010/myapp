@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test200
+  namespace: test200
+  labels:
+    app: test200
+    tier: web2
+  annotations:
+    magedu.com/created-by: "cluster admin"
+spec:
+  selector:
+    matchLabels:
+      app: test200
+      tier: web2
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: test200
+        tier: web2
+    spec:
+      volumes:
+      - name: html
+        emptyDir: {}
+      containers:
+      - name: httpd
+        image: ikubernetes/myapp:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html

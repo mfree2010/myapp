@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 11Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stor-pvc
+  namespace: default
+  labels:
+    app: pvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pvc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      name: pvc
+      namespace: default
+      labels:
+        app: pvc
+        tier: storage
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: nfs-storage
+        persistentVolumeClaim:
+          claimName: mypvc        
+      containers:
+      - name: nfs-test
+        image: ikubernetes/myapp:v1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          periodSeconds: 15
+          initialDelaySeconds: 20
+          timeoutSeconds: 10
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html/
+          name: nfs-storage

@@ -1,0 +1,21 @@
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test100-network-policy
+  namespace: test100
+spec:
+  podSelector:
+    matchLabels:
+      role: test100
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          namespace: test200
+    ports:
+    - protocol: TCP
+      port: 80
+

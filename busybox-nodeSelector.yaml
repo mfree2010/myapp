@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busyboxnode-selector
+  namespace: test100
+  labels:
+    app: busybox
+    tier: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+      tier: test
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      name: busybox
+      namespace: test100
+      labels:
+        app: busybox
+        tier: test
+    spec:
+      nodeSelector:
+       test: ssd
+      volumes:
+      - hostPath:
+          path: /data/k8s-storage
+        name: busybox-storage
+      restartPolicy: Always
+      containers:
+      - name: busybox
+        env:
+        - name: HOSTNAME
+          value: busybox-k8s
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 10
+          exec:
+            command:
+            - "/bin/sh"
+            - "-c" 
+            - "date"
+        ports:
+        - containerPort: 80
+          hostPort: 9991
+          name: busybox-web
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data/web/html
+          name: busybox-storage
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "while true;do echo `date` > /data/web/html/index.html; sleep 600; done"

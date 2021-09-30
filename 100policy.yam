@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test100-policy
+  namespace: test100
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          namespace: test200
+    - ipBlock:
+        cidr: 192.168.107.0/12
+    ports:
+    - port: 80
+      protocol: TCP
+    - port: 443
+      protocol: TCP
+    - port: icmp
+    - port: ip
+  podSelector:
+    matchLabels:
+      app: test100
+      tier: web
+  policyTypes:
+  - Ingress
